@@ -4,7 +4,7 @@
 #
 # This script is self-contained: it installs Python dependencies, builds the
 # FaMA CLI JAR (requires JDK + Maven), and then runs the benchmark with ALL
-# solvers (PySAT × 6, BDD, Z3, FaMA/Choco, FaMA/JaCoP, FaMA/Sat4j) using
+# solvers (PySAT × 6, BDD, Z3, FaMA/Choco, FaMA/Sat4j) using
 # a 900 s per-operation timeout and 4 parallel workers.
 #
 # Usage:
@@ -24,7 +24,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FAMA_SRC_DIR="${SCRIPT_DIR}/fama_src"
 CLI_DIR="${SCRIPT_DIR}/fama_cli"
 FAT_JAR="${CLI_DIR}/target/fama-cli-1.0.0-jar-with-dependencies.jar"
-FAMA_REPO="${FAMA_REPO:-https://github.com/jagalindo/fama}"
+FAMA_REPO="${FAMA_REPO:-https://github.com/diverso-lab/FaMA}"
 SKIP_FAMA="${SKIP_FAMA:-0}"
 PYTHON="${PYTHON:-python3}"
 
@@ -37,14 +37,10 @@ step()    { echo; echo "==> $*"; }
 # ---------------------------------------------------------------------------
 # Args
 # ---------------------------------------------------------------------------
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <models.zip>" >&2
-    exit 1
-fi
+ZIP_FILE="${1:-${SCRIPT_DIR}/uvlhub_bulk_2026_03_13.zip}"
 
-ZIP_FILE="$1"
-
-[ -f "${ZIP_FILE}" ] || error "ZIP file not found: ${ZIP_FILE}"
+[ -f "${ZIP_FILE}" ] || error "ZIP file not found: ${ZIP_FILE}
+  Pass the path as the first argument or place uvlhub_bulk_2026_03_13.zip next to this script."
 
 # ---------------------------------------------------------------------------
 # Step 1 – Python dependencies
@@ -67,7 +63,8 @@ else
     command -v mvn  >/dev/null 2>&1 && HAS_MVN=1
 
     if [ "${HAS_JAVA}" = "0" ] || [ "${HAS_MVN}" = "0" ]; then
-        error "java and mvn are required. Install JDK 11+ and Maven 3.6+ and re-run."
+        warning "java and/or mvn not found — skipping FaMA (set SKIP_FAMA=1 to suppress this warning)."
+        warning "Install JDK 11+ and Maven 3.6+ and re-run to include FaMA results."
     else
         step "Building FaMA …"
 
@@ -105,10 +102,6 @@ else
             net.sourceforge.javacsv javacsv 1.0
         _install_jar "${FAMA_SRC_DIR}/reasoner_choco_2/resources/lib/choco-2.1.0-basic+old.jar" \
             choco choco 2.1.0
-        _install_jar "${FAMA_SRC_DIR}/reasoner_jacop/resources/lib/JaCoP.jar" \
-            org.jacop jacop 1.0
-        _install_jar "${FAMA_SRC_DIR}/reasoner_jacop/resources/lib/jdom.jar" \
-            jdom jdom 1.0
         _install_jar "${FAMA_SRC_DIR}/reasoner_java_bdd/resources/lib/javabdd-1.0b2.jar" \
             net.sf.javabdd javabdd 1.0b2
         _install_jar "${FAMA_SRC_DIR}/reasoner_sat4j/resources/lib/org.sat4j.core.jar" \
@@ -150,10 +143,6 @@ if "ISO-8859-1" not in pom and "<properties>" in pom:
     pom = pom.replace("<properties>", "<properties>\n    <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>", 1)
     open(choco2_pom, "w").write(pom)
     print("[INFO]    /reasoner_choco_2/pom.xml: patched encoding.")
-patch_pom("/reasoner_jacop/pom.xml", "jacop</artifactId>", """
-    <dependency><groupId>org.jacop</groupId><artifactId>jacop</artifactId><version>1.0</version></dependency>
-    <dependency><groupId>jdom</groupId><artifactId>jdom</artifactId><version>1.0</version></dependency>
-""")
 patch_pom("/reasoner_java_bdd/pom.xml", "javabdd</artifactId>", """
     <dependency><groupId>net.sf.javabdd</groupId><artifactId>javabdd</artifactId><version>1.0b2</version></dependency>
 """)
@@ -164,12 +153,50 @@ patch_pom("/reasoner_sat4j/pom.xml", "sat4j.core</artifactId>", """
 """)
 PYEOF
 
+        # 2e – create stub ANTLR token-type files (not committed to the repo)
+        info "Writing ANTLR token-type stubs …"
+        PLAIN_PKG="${FAMA_SRC_DIR}/FaMaFeatureModel/src/es/us/isa/FAMA/models/FAMAfeatureModel/fileformats/plain"
+        cat > "${PLAIN_PKG}/AnalexTokenTypes.java" <<'JEOF'
+package es.us.isa.FAMA.models.FAMAfeatureModel.fileformats.plain;
+public interface AnalexTokenTypes {
+    int EOF=1; int NULL_TREE_LOOKAHEAD=3;
+    int SALTO=4; int BLANCO=5; int LETRA=6; int BARRA_BAJA=7; int GUION=8;
+    int DIGITO=9; int COMILLA=10; int PUNTO=11; int ALMOADILLA=12;
+    int LIT_STRING=13; int NUMERO=14; int LIT_ENTERO=15; int MAS=16;
+    int COMA=17; int PyC=18; int DOSPUNTOS=19; int PARENTESIS_ABRIR=20;
+    int PARENTESIS_CERRAR=21; int LLAVE_ABRIR=22; int LLAVE_CERRAR=23;
+    int CORCHETE_ABRIR=24; int CORCHETE_CERRAR=25; int VIRGULA=26;
+    int VERSION=27; int COMENT_LIN=28; int IDENT=29;
+    int SECCION_RELACIONES=30; int SECCION_CONSTRAINTS=31;
+}
+JEOF
+        cat > "${PLAIN_PKG}/FaMaTreeParserTokenTypes.java" <<'JEOF'
+package es.us.isa.FAMA.models.FAMAfeatureModel.fileformats.plain;
+public interface FaMaTreeParserTokenTypes {
+    int EOF=1; int NULL_TREE_LOOKAHEAD=3;
+    int SALTO=4; int BLANCO=5; int LETRA=6; int BARRA_BAJA=7; int GUION=8;
+    int DIGITO=9; int COMILLA=10; int PUNTO=11; int ALMOADILLA=12;
+    int LIT_STRING=13; int NUMERO=14; int LIT_ENTERO=15; int MAS=16;
+    int COMA=17; int PyC=18; int DOSPUNTOS=19; int PARENTESIS_ABRIR=20;
+    int PARENTESIS_CERRAR=21; int LLAVE_ABRIR=22; int LLAVE_CERRAR=23;
+    int CORCHETE_ABRIR=24; int CORCHETE_CERRAR=25; int VIRGULA=26;
+    int VERSION=27; int COMENT_LIN=28; int IDENT=29;
+    int SECCION_RELACIONES=30; int SECCION_CONSTRAINTS=31;
+    int EXCLUDES=32; int FEATURE_MODEL=33; int CONSTRAINTS=34;
+    int CONSTRAINT=35; int FEATURE=36; int DOMINIO=37; int LIT_REAL=38;
+    int RELACIONES=39; int RELACION=40; int ATRIBUTO=41; int INTEGER=42;
+    int ENUM=43; int DEF_VALUE=44; int NULL_VALUE=45; int VALORES=46;
+    int RANGOS=47; int RANGO=48; int CARDINALIDAD=49; int FEATURES=50;
+    int INVARIANTES=51; int REQUIRES=52;
+}
+JEOF
+
         # install FaMA modules into local Maven repository (no root POM,
         #       so each module is built individually in dependency order;
         #       FAMAAttributedFeatureModel is omitted – not needed)
         info "Installing FaMA modules into local Maven repo (this may take a few minutes) …"
         for MODULE in FaMaSDK FaMaFeatureModel \
-                      reasoner_choco_2 reasoner_jacop \
+                      reasoner_choco_2 \
                       reasoner_java_bdd reasoner_sat4j; do
             MODULE_DIR="${FAMA_SRC_DIR}/${MODULE}"
             if [ -d "${MODULE_DIR}" ]; then

@@ -11,7 +11,7 @@ Pre-computed results and plots are included in `results/` and `plots/`.
 | **PySAT** | glucose3, glucose4, minisat22, lingeling, maplesat, cadical153 | Satisfiable, CoreFeatures, DeadFeatures, FalseOptionalFeatures, ConfigurationsNumber |
 | **BDD** | — | Satisfiable, CoreFeatures, DeadFeatures, FalseOptionalFeatures, ConfigurationsNumber, VariantFeatures, PureOptionalFeatures, UniqueFeatures, Variability, CommonalityFactor, Homogeneity, ProductDistribution, FeatureInclusionProbability, ConfigurationsWithNFeatures |
 | **Z3** | — | Satisfiable, CoreFeatures, DeadFeatures, FalseOptionalFeatures, ConfigurationsNumber, AllFeatureBounds |
-| **FaMA** | Choco, JaCoP, Sat4j | Valid, #Products, DetectErrors, Variability |
+| **FaMA** | Choco, Sat4j | Valid, #Products, DetectErrors, Variability |
 
 FaMA is a legacy Java tool. It is optional: the Docker image builds it automatically; the manual setup requires JDK 11+ and Maven 3.6+.
 
@@ -73,7 +73,7 @@ python main.py run \
 | `--pysat-solvers` | all six | Comma-separated PySAT backends |
 | `--no-pysat` / `--no-bdd` / `--no-z3` / `--no-fama` | off | Disable solver |
 | `--fama-jar` | _(disabled)_ | Path to FaMA fat JAR; enables FaMA |
-| `--fama-solvers` | `Choco,JaCoP,Sat4j` | FaMA solver IDs |
+| `--fama-solvers` | `Choco,Sat4j` | FaMA solver IDs |
 | `--workers` | `1` | Parallel workers (experimental) |
 
 ---

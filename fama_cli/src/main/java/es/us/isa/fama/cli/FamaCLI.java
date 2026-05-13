@@ -24,7 +24,7 @@ import java.net.URL;
  *   java -jar fama-cli.jar <model.fama> <reasoner> <operation>
  *
  * Reasoners (case-sensitive, must match FAMAconfig.xml):
- *   Choco   JaCoP   Sat4j
+ *   Choco   Sat4j
  *
  * Operations:
  *   Valid           – is the feature model void-free? (true/false)
@@ -49,7 +49,7 @@ public class FamaCLI {
         if (args.length != 3) {
             System.err.println(
                 "Usage: FamaCLI <model.fama> <reasoner> <operation>\n" +
-                "  reasoners : Choco | JaCoP | Sat4j\n" +
+                "  reasoners : Choco | Sat4j\n" +
                 "  operations: Valid | #Products | DetectErrors | Commonality | Variability"
             );
             System.exit(1);
@@ -83,7 +83,6 @@ public class FamaCLI {
                 pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                 pw.println("<questionTrader>");
                 pw.println("  <reasoner id=\"Choco\" file=\"" + jarPath + "\" class=\"es.us.isa.ChocoReasoner.ChocoReasoner\"/>");
-                pw.println("  <reasoner id=\"JaCoP\" file=\"" + jarPath + "\" class=\"es.us.isa.JaCoPReasoner.JaCoPReasoner\"/>");
                 pw.println("  <reasoner id=\"Sat4j\" file=\"" + jarPath + "\" class=\"es.us.isa.Sat4jReasoner.Sat4jReasoner\"/>");
                 pw.println("  <criteriaSelector name=\"Default\" class=\"es.us.isa.FAMA.Reasoner.DefaultCriteriaSelector\"/>");
                 pw.println("  <question id=\"Valid\" interface=\"es.us.isa.FAMA.Reasoner.questions.ValidQuestion\"/>");

@@ -19,7 +19,6 @@ FaMA integration
 ----------------
 FaMA is an old Java-based feature model analyser with three constraint solvers:
   * Choco   – Choco2 constraint-programming solver
-  * JaCoP   – Java Constraint Programming solver
   * Sat4j   – SAT-based solver
 
 To enable FaMA benchmarking:
@@ -111,11 +110,8 @@ Z3_OPERATIONS = [
 # FaMA (Java) solver configuration
 # ---------------------------------------------------------------------------
 ALL_FAMA_SOLVERS = [
-    'Choco',    # Choco2 – both jagalindo/fama and diverso-lab/FaMA
-    'JaCoP',    # Java Constraint Programming
+    'Choco',    # Choco2 constraint solver
     'Sat4j',    # SAT-based solver
-    # 'Choco3',  # Choco3 – only in diverso-lab/FaMA v1.4+
-    # 'JavaBDD', # BDD-based – available in both forks
 ]
 
 # FaMA question IDs (must match FaMaConfig.xml registrations)

@@ -25,12 +25,6 @@ RUN mvn install:install-file -q -Dpackaging=jar \
       -Dfile=fama_src/reasoner_choco_2/resources/lib/choco-2.1.0-basic+old.jar \
       -DgroupId=choco -DartifactId=choco -Dversion=2.1.0 \
  && mvn install:install-file -q -Dpackaging=jar \
-      -Dfile=fama_src/reasoner_jacop/resources/lib/JaCoP.jar \
-      -DgroupId=org.jacop -DartifactId=jacop -Dversion=1.0 \
- && mvn install:install-file -q -Dpackaging=jar \
-      -Dfile=fama_src/reasoner_jacop/resources/lib/jdom.jar \
-      -DgroupId=jdom -DartifactId=jdom -Dversion=1.0 \
- && mvn install:install-file -q -Dpackaging=jar \
       -Dfile=fama_src/reasoner_sat4j/resources/lib/org.sat4j.core.jar \
       -DgroupId=org.ow2.sat4j -DartifactId=org.sat4j.core -Dversion=2.3 \
  && mvn install:install-file -q -Dpackaging=jar \
@@ -54,10 +48,6 @@ RUN grep -q 'artifactId>choco<' fama_src/reasoner_choco_2/pom.xml || sed -i \
 RUN grep -q 'ISO-8859-1' fama_src/reasoner_choco_2/pom.xml || sed -i \
       's|<properties>|<properties>\n    <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>|' \
       fama_src/reasoner_choco_2/pom.xml
-
-RUN grep -q 'artifactId>jacop<' fama_src/reasoner_jacop/pom.xml || sed -i \
-      '0,/<\/dependencies>/s|</dependencies>|  <dependency><groupId>org.jacop</groupId><artifactId>jacop</artifactId><version>1.0</version></dependency>\n  <dependency><groupId>jdom</groupId><artifactId>jdom</artifactId><version>1.0</version></dependency>\n  </dependencies>|' \
-      fama_src/reasoner_jacop/pom.xml
 
 RUN grep -q 'sat4j.core</artifactId>' fama_src/reasoner_sat4j/pom.xml || sed -i \
       '0,/<\/dependencies>/s|</dependencies>|  <dependency><groupId>org.ow2.sat4j</groupId><artifactId>org.sat4j.core</artifactId><version>2.3</version></dependency>\n  <dependency><groupId>org.ow2.sat4j</groupId><artifactId>org.sat4j.maxsat</artifactId><version>2.3</version></dependency>\n  <dependency><groupId>org.ow2.sat4j</groupId><artifactId>sat4j-maxsat</artifactId><version>2.3</version></dependency>\n  </dependencies>|' \
@@ -108,7 +98,6 @@ JEOF
 RUN cd fama_src/FaMaSDK          && mvn install -DskipTests --batch-mode -q
 RUN cd fama_src/FaMaFeatureModel && mvn install -DskipTests --batch-mode -q
 RUN cd fama_src/reasoner_choco_2 && mvn install -DskipTests --batch-mode -q
-RUN cd fama_src/reasoner_jacop   && mvn install -DskipTests --batch-mode -q
 RUN cd fama_src/reasoner_sat4j   && mvn install -DskipTests --batch-mode -q
 
 # Build the CLI fat JAR
