@@ -1,42 +1,50 @@
-FROM python:3.11-slim
+# ---- Stage 1: build the FaMA fat JAR (Maven + JDK, discarded after build) ----
+FROM maven:3.9-eclipse-temurin-17 AS builder
 
-# System tools: git (to clone FaMA), JDK 17 + Maven (to build it)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        git \
-        default-jdk-headless \
-        maven \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /build
+
+# Clone diverso-lab/FaMA — no root pom.xml, so build each module individually
+RUN git clone --depth 1 https://github.com/diverso-lab/FaMA fama_src
+
+# Patch any lingering Java-5 source/target declarations
+RUN find fama_src -name "pom.xml" \
+      -exec sed -i \
+          's|<source>5</source>|<source>8</source>|g;s|<target>5</target>|<target>8</target>|g' \
+          {} +
+
+# Build in dependency order
+RUN cd fama_src/FaMaSDK          && mvn install -DskipTests --batch-mode -q
+RUN cd fama_src/FaMaFeatureModel && mvn install -DskipTests --batch-mode -q
+RUN cd fama_src/reasoner_choco_2 && mvn install -DskipTests --batch-mode -q
+RUN cd fama_src/reasoner_jacop   && mvn install -DskipTests --batch-mode -q
+RUN cd fama_src/reasoner_sat4j   && mvn install -DskipTests --batch-mode -q
+
+# Build the thin CLI wrapper fat JAR
+COPY fama_cli/ ./fama_cli/
+RUN cd fama_cli && mvn package -DskipTests --batch-mode -q
+
+
+# ---- Stage 2: Python runtime (lean — no JDK or Maven) ----
+FROM python:3.11-slim
 
 WORKDIR /benchmark
 
-# Python deps — cached separately so source changes don't re-install
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Application source
 COPY main.py .
 COPY scripts/ ./scripts/
-COPY fama_cli/ ./fama_cli/
 COPY uvlhub_bulk_2026_03_13.zip .
 
-# Build the FaMA JAR at image build time so users don't need Maven at runtime.
-# Uses the diverso-lab/FaMA fork (actively maintained, clean multi-module POM).
-RUN git clone --depth 1 https://github.com/diverso-lab/FaMA fama_src \
- && find fama_src -name "pom.xml" \
-        -exec sed -i \
-            's|<source>5</source>|<source>8</source>|g;s|<target>5</target>|<target>8</target>|g' \
-            {} + \
- && cd fama_src && mvn install -DskipTests --batch-mode -q \
- && cd /benchmark/fama_cli && mvn package -DskipTests --batch-mode -q \
- && rm -rf /benchmark/fama_src ~/.m2
-
-ENV FAMA_JAR=/benchmark/fama_cli/target/fama-cli-1.0.0-jar-with-dependencies.jar
+# Copy only the JAR from the builder stage
+COPY --from=builder /build/fama_cli/target/fama-cli-1.0.0-jar-with-dependencies.jar \
+     ./fama_cli/fama-cli.jar
 
 # Default: run the full benchmark (all solvers, 60 s per-operation timeout).
 # Override by passing extra arguments after the image name, e.g.:
-#   docker run flamapy-benchmark --max-models 10 --timeout 30 --no-fama
+#   docker run flamapy-benchmark python main.py run --max-models 10 --no-fama
 CMD ["python", "main.py", "run", \
      "--zip",      "uvlhub_bulk_2026_03_13.zip", \
-     "--fama-jar", "/benchmark/fama_cli/target/fama-cli-1.0.0-jar-with-dependencies.jar", \
+     "--fama-jar", "fama_cli/fama-cli.jar", \
      "--output",   "output/benchmark_results.csv", \
      "--timeout",  "60"]
