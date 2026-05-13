@@ -12,7 +12,6 @@
        es.us.isa : FaMaFeatureModel : 0.8.2
        es.us.isa : FaMaSDK          : 0.8.2
        es.us.isa : reasoner_choco_2 : 0.8.2
-       es.us.isa : reasoner_jacop   : 0.8.2
        es.us.isa : reasoner_sat4j   : 0.8.2
      (Version numbers may differ; adjust <version> tags below accordingly.)
 
@@ -72,11 +71,6 @@
       <groupId>es.us.isa</groupId>
       <artifactId>ChocoReasoner</artifactId>
       <version>1.1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>es.us.isa</groupId>
-      <artifactId>JaCoPReasoner</artifactId>
-      <version>1.0.1</version>
     </dependency>
     <dependency>
       <groupId>es.us.isa</groupId>
