@@ -1,0 +1,5 @@
+# Files excluded from `git archive` (Zenodo downloads the archive via GitHub releases)
+CLAUDE.md         export-ignore
+UPDATE_PAPER.md   export-ignore
+chico_benchmark.zip export-ignore
+.claude/          export-ignore

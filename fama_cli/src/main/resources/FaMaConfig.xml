@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  FaMaConfig.xml – bundled inside fama-cli.jar
+  Registers the three solvers we want to benchmark (Choco, JaCoP, Sat4j),
+  the five supported question types, and the FAMA feature-model reader.
+  Adjust class names if you are using a different FAMA version.
+-->
+<FaMaConfig>
+
+  <!-- ================================================================== -->
+  <!-- Reasoners                                                           -->
+  <!-- ================================================================== -->
+  <reasoners>
+    <!-- Choco 2 (present in jagalindo/fama and diverso-lab/FaMA) -->
+    <reasoner id="Choco"
+              class="es.us.isa.ChocoReasoner.ChocoReasoner"/>
+    <!-- Choco 3 (only in diverso-lab/FaMA v1.4+; remove if using jagalindo/fama) -->
+    <reasoner id="Choco3"
+              class="es.us.isa.ChocoReasoner3.ChocoReasoner"/>
+    <reasoner id="JaCoP"
+              class="es.us.isa.JaCoPReasoner.JaCoPReasoner"/>
+    <reasoner id="Sat4j"
+              class="es.us.isa.Sat4jReasoner.Sat4jReasoner"/>
+    <!-- JavaBDD – available in both forks; useful for large models -->
+    <reasoner id="JavaBDD"
+              class="es.us.isa.JavaBDDReasoner.JavaBDDReasoner"/>
+  </reasoners>
+
+  <!-- ================================================================== -->
+  <!-- Questions / operations                                              -->
+  <!-- ================================================================== -->
+  <questions>
+    <question id="Valid"
+              class="es.us.isa.FAMA.Reasoner.questions.ValidQuestion"/>
+    <question id="#Products"
+              class="es.us.isa.FAMA.Reasoner.questions.NumberOfProductsQuestion"/>
+    <question id="DetectErrors"
+              class="es.us.isa.FAMA.Reasoner.questions.DetectErrorsQuestion"/>
+    <question id="Commonality"
+              class="es.us.isa.FAMA.Reasoner.questions.CommonalityQuestion"/>
+    <question id="Variability"
+              class="es.us.isa.FAMA.Reasoner.questions.VariabilityQuestion"/>
+  </questions>
+
+  <!-- ================================================================== -->
+  <!-- Model readers / writers (the FAMA XML feature-model format)        -->
+  <!-- ================================================================== -->
+  <transformations>
+    <transformation id="FAMAFeatureModel"
+                    class="es.us.isa.FAMA.models.FAMAfeatureModel.transformations.XMLFeatureModelParser"/>
+  </transformations>
+
+  <!-- ================================================================== -->
+  <!-- Criteria selector (auto-select best reasoner when none is forced)  -->
+  <!-- ================================================================== -->
+  <criteriaSelectors>
+    <criteriaSelector id="Default"
+                      class="es.us.isa.FAMA.Reasoner.criteriaSelector.DefaultCriteriaSelector"/>
+  </criteriaSelectors>
+
+</FaMaConfig>

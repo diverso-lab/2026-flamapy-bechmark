@@ -1,0 +1,11 @@
+# Flamapy core distribution (includes flamapy-fw, flamapy-fm, flamapy-sat, flamapy-bdd)
+flamapy>=2.5.0
+
+# Z3 solver plugin (not included in the flamapy distribution)
+flamapy-z3>=2.5.0
+
+# UVL parser (pulled in by flamapy-fm)
+uvlparser>=2.5.0
+
+# Progress bar
+tqdm>=4.0.0

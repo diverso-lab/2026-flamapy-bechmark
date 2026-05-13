@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Maven POM for the FamaCLI wrapper.
+
+  Build instructions
+  ──────────────────
+  1. Clone and build the core FAMA project first:
+       git clone https://github.com/jagalindo/fama.git
+       cd fama
+       mvn install -DskipTests
+     This installs the following artefacts into your local ~/.m2 repository:
+       es.us.isa : FaMaFeatureModel : 0.8.2
+       es.us.isa : FaMaSDK          : 0.8.2
+       es.us.isa : reasoner_choco_2 : 0.8.2
+       es.us.isa : reasoner_jacop   : 0.8.2
+       es.us.isa : reasoner_sat4j   : 0.8.2
+     (Version numbers may differ; adjust <version> tags below accordingly.)
+
+  2. Build this CLI JAR:
+       cd /path/to/flamapy_benchmark_journal/fama_cli
+       mvn package -DskipTests
+
+  3. The fat JAR is produced at:
+       fama_cli/target/fama-cli-jar-with-dependencies.jar
+
+  4. Quick smoke test:
+       java -jar target/fama-cli-jar-with-dependencies.jar \
+            /path/to/model.fama Sat4j Valid
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>es.us.isa.fama</groupId>
+  <artifactId>fama-cli</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+  <name>FaMA CLI Benchmark Wrapper</name>
+  <description>
+    Thin command-line wrapper around the FaMA QuestionTrader for use in
+    the flamapy benchmark journal.
+  </description>
+
+  <properties>
+    <java.version>11</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+
+    <!-- Core FaMA SDK (QuestionTrader, Question interfaces, …) -->
+    <dependency>
+      <groupId>es.us.isa</groupId>
+      <artifactId>FaMaSDK</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+
+    <!-- FaMA Feature Model (XML reader/writer) -->
+    <dependency>
+      <groupId>es.us.isa</groupId>
+      <artifactId>FaMaFeatureModel</artifactId>
+      <version>0.9.1</version>
+    </dependency>
+
+    <!-- Reasoner plug-ins -->
+    <dependency>
+      <groupId>es.us.isa</groupId>
+      <artifactId>ChocoReasoner</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>es.us.isa</groupId>
+      <artifactId>JaCoPReasoner</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>es.us.isa</groupId>
+      <artifactId>Sat4jReasoner</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+
+      <!-- Compile with Java 11 (FAMA sources are Java 6 compatible) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
+      </plugin>
+
+      <!-- Build a single fat JAR with all dependencies bundled -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.6.0</version>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <archive>
+            <manifest>
+              <mainClass>es.us.isa.fama.cli.FamaCLI</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+        <executions>
+          <execution>
+            <id>assemble-all</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+
+</project>
