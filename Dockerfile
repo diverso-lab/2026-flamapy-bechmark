@@ -41,42 +41,27 @@ RUN mvn install:install-file -q -Dpackaging=jar \
       -DgroupId=org.ow2.sat4j -DartifactId=sat4j-maxsat -Dversion=2.3
 
 # Patch each module's pom.xml to declare the bundled JARs as compile dependencies
-RUN python3 - <<'PYEOF'
-import re, os
+# (uses only sed/grep — no python3 required in the builder image)
+RUN grep -q 'antlr</artifactId>' fama_src/FaMaFeatureModel/pom.xml || sed -i \
+      '0,/<\/dependencies>/s|</dependencies>|  <dependency><groupId>antlr</groupId><artifactId>antlr</artifactId><version>2.7.7</version></dependency>\n  <dependency><groupId>fmapi</groupId><artifactId>Fmapi</artifactId><version>1.0</version></dependency>\n  <dependency><groupId>net.sourceforge.javacsv</groupId><artifactId>javacsv</artifactId><version>1.0</version></dependency>\n  </dependencies>|' \
+      fama_src/FaMaFeatureModel/pom.xml
 
-SRC = "fama_src"
+RUN grep -q 'artifactId>choco<' fama_src/reasoner_choco_2/pom.xml || sed -i \
+      '0,/<\/dependencies>/s|</dependencies>|  <dependency><groupId>choco</groupId><artifactId>choco</artifactId><version>2.1.0</version></dependency>\n  </dependencies>|' \
+      fama_src/reasoner_choco_2/pom.xml
 
-def patch(path, marker, deps):
-    pom = open(path).read()
-    if marker in pom:
-        return  # already patched
-    pom = pom.replace("</dependencies>", deps + "\n  </dependencies>", 1)
-    open(path, "w").write(pom)
+# Fix encoding for reasoner_choco_2 (source files are ISO-8859-1)
+RUN grep -q 'ISO-8859-1' fama_src/reasoner_choco_2/pom.xml || sed -i \
+      's|<properties>|<properties>\n    <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>|' \
+      fama_src/reasoner_choco_2/pom.xml
 
-patch(f"{SRC}/FaMaFeatureModel/pom.xml", "antlr</artifactId>", """
-    <dependency><groupId>antlr</groupId><artifactId>antlr</artifactId><version>2.7.7</version></dependency>
-    <dependency><groupId>fmapi</groupId><artifactId>Fmapi</artifactId><version>1.0</version></dependency>
-    <dependency><groupId>net.sourceforge.javacsv</groupId><artifactId>javacsv</artifactId><version>1.0</version></dependency>""")
+RUN grep -q 'artifactId>jacop<' fama_src/reasoner_jacop/pom.xml || sed -i \
+      '0,/<\/dependencies>/s|</dependencies>|  <dependency><groupId>org.jacop</groupId><artifactId>jacop</artifactId><version>1.0</version></dependency>\n  <dependency><groupId>jdom</groupId><artifactId>jdom</artifactId><version>1.0</version></dependency>\n  </dependencies>|' \
+      fama_src/reasoner_jacop/pom.xml
 
-patch(f"{SRC}/reasoner_choco_2/pom.xml", "artifactId>choco<", """
-    <dependency><groupId>choco</groupId><artifactId>choco</artifactId><version>2.1.0</version></dependency>""")
-
-# Also fix encoding for reasoner_choco_2 (source files are ISO-8859-1)
-choco_pom = f"{SRC}/reasoner_choco_2/pom.xml"
-pom = open(choco_pom).read()
-if "ISO-8859-1" not in pom and "<properties>" in pom:
-    pom = pom.replace("<properties>", "<properties>\n    <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>", 1)
-    open(choco_pom, "w").write(pom)
-
-patch(f"{SRC}/reasoner_jacop/pom.xml", "artifactId>jacop<", """
-    <dependency><groupId>org.jacop</groupId><artifactId>jacop</artifactId><version>1.0</version></dependency>
-    <dependency><groupId>jdom</groupId><artifactId>jdom</artifactId><version>1.0</version></dependency>""")
-
-patch(f"{SRC}/reasoner_sat4j/pom.xml", "sat4j.core</artifactId>", """
-    <dependency><groupId>org.ow2.sat4j</groupId><artifactId>org.sat4j.core</artifactId><version>2.3</version></dependency>
-    <dependency><groupId>org.ow2.sat4j</groupId><artifactId>org.sat4j.maxsat</artifactId><version>2.3</version></dependency>
-    <dependency><groupId>org.ow2.sat4j</groupId><artifactId>sat4j-maxsat</artifactId><version>2.3</version></dependency>""")
-PYEOF
+RUN grep -q 'sat4j.core</artifactId>' fama_src/reasoner_sat4j/pom.xml || sed -i \
+      '0,/<\/dependencies>/s|</dependencies>|  <dependency><groupId>org.ow2.sat4j</groupId><artifactId>org.sat4j.core</artifactId><version>2.3</version></dependency>\n  <dependency><groupId>org.ow2.sat4j</groupId><artifactId>org.sat4j.maxsat</artifactId><version>2.3</version></dependency>\n  <dependency><groupId>org.ow2.sat4j</groupId><artifactId>sat4j-maxsat</artifactId><version>2.3</version></dependency>\n  </dependencies>|' \
+      fama_src/reasoner_sat4j/pom.xml
 
 # Build modules in dependency order
 RUN cd fama_src/FaMaSDK          && mvn install -DskipTests --batch-mode -q
