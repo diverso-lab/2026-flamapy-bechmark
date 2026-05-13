@@ -66,8 +66,9 @@ RUN grep -q 'sat4j.core</artifactId>' fama_src/reasoner_sat4j/pom.xml || sed -i 
 # Stub the ANTLR-generated token-type interfaces required by the plain-format
 # parser (Analex / FaMaTreeParser). These files were not committed to the repo.
 # The plain parser is never used at runtime — only XMLReader is registered.
-RUN d=fama_src/FaMaFeatureModel/src/es/us/isa/FAMA/models/FAMAfeatureModel/fileformats/plain && \
-cat > $d/AnalexTokenTypes.java <<'JEOF'
+# NOTE: each RUN can contain at most one heredoc (Docker ends the instruction
+#       at the first terminator), so we use two separate RUN steps.
+RUN cat > fama_src/FaMaFeatureModel/src/es/us/isa/FAMA/models/FAMAfeatureModel/fileformats/plain/AnalexTokenTypes.java <<'JEOF'
 package es.us.isa.FAMA.models.FAMAfeatureModel.fileformats.plain;
 public interface AnalexTokenTypes {
     int EOF=1; int NULL_TREE_LOOKAHEAD=3;
@@ -81,7 +82,8 @@ public interface AnalexTokenTypes {
     int SECCION_RELACIONES=30; int SECCION_CONSTRAINTS=31;
 }
 JEOF
-cat > $d/FaMaTreeParserTokenTypes.java <<'JEOF'
+
+RUN cat > fama_src/FaMaFeatureModel/src/es/us/isa/FAMA/models/FAMAfeatureModel/fileformats/plain/FaMaTreeParserTokenTypes.java <<'JEOF'
 package es.us.isa.FAMA.models.FAMAfeatureModel.fileformats.plain;
 public interface FaMaTreeParserTokenTypes {
     int EOF=1; int NULL_TREE_LOOKAHEAD=3;
