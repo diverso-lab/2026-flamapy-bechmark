@@ -63,6 +63,45 @@ RUN grep -q 'sat4j.core</artifactId>' fama_src/reasoner_sat4j/pom.xml || sed -i 
       '0,/<\/dependencies>/s|</dependencies>|  <dependency><groupId>org.ow2.sat4j</groupId><artifactId>org.sat4j.core</artifactId><version>2.3</version></dependency>\n  <dependency><groupId>org.ow2.sat4j</groupId><artifactId>org.sat4j.maxsat</artifactId><version>2.3</version></dependency>\n  <dependency><groupId>org.ow2.sat4j</groupId><artifactId>sat4j-maxsat</artifactId><version>2.3</version></dependency>\n  </dependencies>|' \
       fama_src/reasoner_sat4j/pom.xml
 
+# Stub the ANTLR-generated token-type interfaces required by the plain-format
+# parser (Analex / FaMaTreeParser). These files were not committed to the repo.
+# The plain parser is never used at runtime — only XMLReader is registered.
+RUN d=fama_src/FaMaFeatureModel/src/es/us/isa/FAMA/models/FAMAfeatureModel/fileformats/plain && \
+cat > $d/AnalexTokenTypes.java <<'JEOF'
+package es.us.isa.FAMA.models.FAMAfeatureModel.fileformats.plain;
+public interface AnalexTokenTypes {
+    int EOF=1; int NULL_TREE_LOOKAHEAD=3;
+    int SALTO=4; int BLANCO=5; int LETRA=6; int BARRA_BAJA=7; int GUION=8;
+    int DIGITO=9; int COMILLA=10; int PUNTO=11; int ALMOADILLA=12;
+    int LIT_STRING=13; int NUMERO=14; int LIT_ENTERO=15; int MAS=16;
+    int COMA=17; int PyC=18; int DOSPUNTOS=19; int PARENTESIS_ABRIR=20;
+    int PARENTESIS_CERRAR=21; int LLAVE_ABRIR=22; int LLAVE_CERRAR=23;
+    int CORCHETE_ABRIR=24; int CORCHETE_CERRAR=25; int VIRGULA=26;
+    int VERSION=27; int COMENT_LIN=28; int IDENT=29;
+    int SECCION_RELACIONES=30; int SECCION_CONSTRAINTS=31;
+}
+JEOF
+cat > $d/FaMaTreeParserTokenTypes.java <<'JEOF'
+package es.us.isa.FAMA.models.FAMAfeatureModel.fileformats.plain;
+public interface FaMaTreeParserTokenTypes {
+    int EOF=1; int NULL_TREE_LOOKAHEAD=3;
+    int SALTO=4; int BLANCO=5; int LETRA=6; int BARRA_BAJA=7; int GUION=8;
+    int DIGITO=9; int COMILLA=10; int PUNTO=11; int ALMOADILLA=12;
+    int LIT_STRING=13; int NUMERO=14; int LIT_ENTERO=15; int MAS=16;
+    int COMA=17; int PyC=18; int DOSPUNTOS=19; int PARENTESIS_ABRIR=20;
+    int PARENTESIS_CERRAR=21; int LLAVE_ABRIR=22; int LLAVE_CERRAR=23;
+    int CORCHETE_ABRIR=24; int CORCHETE_CERRAR=25; int VIRGULA=26;
+    int VERSION=27; int COMENT_LIN=28; int IDENT=29;
+    int SECCION_RELACIONES=30; int SECCION_CONSTRAINTS=31;
+    int EXCLUDES=32; int FEATURE_MODEL=33; int CONSTRAINTS=34;
+    int CONSTRAINT=35; int FEATURE=36; int DOMINIO=37; int LIT_REAL=38;
+    int RELACIONES=39; int RELACION=40; int ATRIBUTO=41; int INTEGER=42;
+    int ENUM=43; int DEF_VALUE=44; int NULL_VALUE=45; int VALORES=46;
+    int RANGOS=47; int RANGO=48; int CARDINALIDAD=49; int FEATURES=50;
+    int INVARIANTES=51; int REQUIRES=52;
+}
+JEOF
+
 # Build modules in dependency order
 RUN cd fama_src/FaMaSDK          && mvn install -DskipTests --batch-mode -q
 RUN cd fama_src/FaMaFeatureModel && mvn install -DskipTests --batch-mode -q
