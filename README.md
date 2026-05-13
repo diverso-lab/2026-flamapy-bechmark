@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/1237564231.svg)](https://doi.org/10.5281/zenodo.20156321)
+
 # Flamapy Solver Benchmark
 
 Benchmarks all solver backends available in the [Flamapy](https://flamapy.github.io/) framework — PySAT (six SAT backends), BDD, Z3, and the legacy Java FaMA tool — across 1,611 UVL feature models from [UVLHub](https://www.uvlhub.io/).
