@@ -3,7 +3,7 @@ FROM python:3.11-slim
 # System tools: git (to clone FaMA), JDK 17 + Maven (to build it)
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
-        openjdk-17-jdk-headless \
+        default-jdk-headless \
         maven \
     && rm -rf /var/lib/apt/lists/*
 
