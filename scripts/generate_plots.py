@@ -104,7 +104,6 @@ def plot_status_rates(df: pd.DataFrame, out: Path) -> None:
     ax.set_xticklabels(valid_solvers)
     ax.set_ylabel("Percentage of solver calls (%)")
     ax.set_ylim(0, 105)
-    ax.set_title("Figure 1 — Solver Call Outcome Rates")
     ax.legend(loc="upper right", framealpha=0.85)
     fig.tight_layout()
     fig.savefig(out / "fig1_status_rates.pdf")
@@ -138,7 +137,6 @@ def plot_time_distributions(df: pd.DataFrame, out: Path) -> None:
                         if ax.get_ylim()[0] <= y <= ax.get_ylim()[1]])
     ax.set_ylabel("Execution time (log scale)")
     ax.set_xlabel("")
-    ax.set_title("Figure 2 — Execution Time Distribution (successful runs)")
     fig.tight_layout()
     fig.savefig(out / "fig2_time_distributions.pdf")
     fig.savefig(out / "fig2_time_distributions.png")
@@ -176,7 +174,6 @@ def plot_timeout_heatmap(df: pd.DataFrame, out: Path) -> None:
     sns.heatmap(pivot, annot=True, fmt=".1f", cmap="YlOrRd", vmin=0, vmax=100,
                 linewidths=0.4, linecolor="white",
                 cbar_kws={"label": "Timeout rate (%)"}, ax=ax)
-    ax.set_title("Figure 3 — Timeout Rate by Solver × Operation (%)")
     ax.set_xlabel("")
     ax.set_ylabel("")
     plt.xticks(rotation=35, ha="right")
@@ -250,7 +247,6 @@ def plot_scalability(df: pd.DataFrame, out: Path) -> None:
     for j in range(n_ops, len(axes_flat)):
         axes_flat[j].set_visible(False)
 
-    fig.suptitle("Figure 4 — Scalability: Execution Time vs. Model Size", fontsize=13, y=1.01)
     fig.tight_layout()
     fig.savefig(out / "fig4_scalability.pdf")
     fig.savefig(out / "fig4_scalability.png")
@@ -289,7 +285,6 @@ def plot_coverage_curve(df: pd.DataFrame, out: Path) -> None:
     ax.set_xlabel("Time budget (seconds, log scale)")
     ax.set_ylabel("% of tasks completed")
     ax.set_ylim(0, 105)
-    ax.set_title("Figure 5 — Solver Coverage Curve")
     ax.legend(loc="upper left", framealpha=0.85)
 
     # Reference lines
@@ -324,7 +319,6 @@ def plot_pysat_variants(df: pd.DataFrame, out: Path) -> None:
                         if ax.get_ylim()[0] <= y <= ax.get_ylim()[1]])
     ax.set_ylabel("Execution time (log scale)")
     ax.set_xlabel("SAT solver backend")
-    ax.set_title("Figure 6 — PySAT Backend Comparison (successful runs)")
     fig.tight_layout()
     fig.savefig(out / "fig6_pysat_variants.pdf")
     fig.savefig(out / "fig6_pysat_variants.png")
@@ -361,7 +355,6 @@ def plot_dataset_distribution(df: pd.DataFrame, out: Path) -> None:
             ax.text(med * 1.1, ax.get_ylim()[1] * 0.88, f"median={med:.0f}",
                     color="crimson", fontsize=9)
 
-    fig.suptitle("Figure 7 — Benchmark Dataset Complexity Distribution (1 382 models)", fontsize=12)
     fig.tight_layout()
     fig.savefig(out / "fig7_dataset_distribution.pdf", bbox_inches="tight")
     fig.savefig(out / "fig7_dataset_distribution.png", bbox_inches="tight")
@@ -419,7 +412,6 @@ def plot_operation_ranking(df: pd.DataFrame, out: Path) -> None:
     ax.set_yticks([y for y in yticks if ax.get_ylim()[0] - 0.2 <= y <= ax.get_ylim()[1] + 0.2])
     ax.set_yticklabels([l for y, l in zip(yticks, ylabels)
                         if ax.get_ylim()[0] - 0.2 <= y <= ax.get_ylim()[1] + 0.2])
-    ax.set_title("Figure 8 — Per-Operation Solver Ranking (median time, shared operations)")
     ax.legend(loc="upper left", framealpha=0.85)
     fig.tight_layout()
     fig.savefig(out / "fig8_operation_ranking.pdf")
